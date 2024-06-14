@@ -136,8 +136,16 @@ class FileSystemApp:
         if hasattr(self, 'fs'):
             dir_name = self.prompt_for_input("Ingrese el nombre del directorio:")
             if dir_name:
-                mkdir(self.fs, dir_name)
-                self.result_text.insert(tk.END, f"Directorio '{dir_name}' creado.\n")
+                if dir_name in self.fs.current_directory.subdirectories:
+                    overwrite = messagebox.askyesno("Sobrescribir directorio", f"El directorio '{dir_name}' ya existe. ¿Desea sobrescribirlo?")
+                    if not overwrite:
+                        self.result_text.insert(tk.END, f"Operación cancelada. El directorio '{dir_name}' no fue creado.\n")
+                        return
+                success, message = mkdir(self.fs, dir_name, overwrite=True)
+                if not success:
+                    messagebox.showerror("Error", message)
+                else:
+                    self.result_text.insert(tk.END, f"{message}\n")
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
@@ -147,8 +155,17 @@ class FileSystemApp:
             extension = self.prompt_for_input("Ingrese la extensión del archivo:")
             content = self.prompt_for_input("Ingrese el contenido del archivo:")
             if file_name and extension:
-                create_file(self.fs, file_name, extension, content)
-                self.result_text.insert(tk.END, f"Archivo '{file_name}.{extension}' creado con contenido: {content}\n")
+                full_name = f"{file_name}.{extension}"
+                if full_name in self.fs.current_directory.files:
+                    overwrite = messagebox.askyesno("Sobrescribir archivo", f"El archivo '{full_name}' ya existe. ¿Desea sobrescribirlo?")
+                    if not overwrite:
+                        self.result_text.insert(tk.END, f"Operación cancelada. El archivo '{full_name}' no fue creado.\n")
+                        return
+                success, message = create_file(self.fs, file_name, extension, content, overwrite=True)
+                if not success:
+                    messagebox.showerror("Error", message)
+                else:
+                    self.result_text.insert(tk.END, f"{message}\n")
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
