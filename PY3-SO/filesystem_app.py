@@ -12,7 +12,7 @@ from comandos_basicos.copiar import copy
 from comandos_basicos.find import find
 from comandos_basicos.ver import view_file
 from comandos_basicos.editar import edit_file
-from comandos_basicos.tree import show_tree 
+from comandos_basicos.tree import show_tree
 from comandos_basicos.ver_propiedades import show_file_properties
 from comandos_basicos.eliminar import delete_file
 
@@ -96,8 +96,8 @@ class FileSystemApp:
         self.show_properties_button.grid(row=2, column=1, pady=2, sticky=(tk.W, tk.E))
         
         # Botón para eliminar un archivo
-        self.show_properties_button = ttk.Button(commands_frame, text="Eliminar (ReMove)", command=self.delete_file)
-        self.show_properties_button.grid(row=3, column=1, pady=2, sticky=(tk.W, tk.E))
+        self.delete_button = ttk.Button(commands_frame, text="Eliminar (del)", command=self.delete_file)
+        self.delete_button.grid(row=3, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para mostrar el árbol
         self.show_tree_button = ttk.Button(commands_frame, text="Árbol (Tree)", command=self.show_directory_tree)
@@ -105,7 +105,7 @@ class FileSystemApp:
 
         # Botón para regresar al root
         self.back_to_root_button = ttk.Button(commands_frame, text="Raíz (Root)", command=self.back_to_root)
-        self.back_to_root_button.grid(row=6, column=1, pady=2, sticky=(tk.W, tk.E))
+        self.back_to_root_button.grid(row=5, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Frame derecho para resultados
         result_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
@@ -142,7 +142,7 @@ class FileSystemApp:
                     if not overwrite:
                         self.result_text.insert(tk.END, f"Operación cancelada. El directorio '{dir_name}' no fue creado.\n")
                         return
-                success, message = mkdir(self.fs, dir_name, overwrite=True)
+                success, message = mkdir(self.fs, dir_name)
                 if not success:
                     messagebox.showerror("Error", message)
                 else:
@@ -162,7 +162,7 @@ class FileSystemApp:
                     if not overwrite:
                         self.result_text.insert(tk.END, f"Operación cancelada. El archivo '{full_name}' no fue creado.\n")
                         return
-                success, message = create_file(self.fs, file_name, extension, content, overwrite=True)
+                success, message = create_file(self.fs, file_name, extension, content)
                 if not success:
                     messagebox.showerror("Error", message)
                 else:
@@ -236,6 +236,17 @@ class FileSystemApp:
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
+    def delete_file(self):
+        if hasattr(self, 'fs'):
+            file_name = self.prompt_for_input("Ingrese el nombre del archivo (sin extensión):")
+            extension = self.prompt_for_input("Ingrese la extensión del archivo:")
+            if file_name and extension:
+                full_name = f"{file_name}.{extension}"
+                result = delete_file(self.fs, full_name)
+                self.result_text.insert(tk.END, f"{result}\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
     def prompt_for_input(self, prompt):
         input_dialog = tk.Toplevel(self.root)
         input_dialog.title(prompt)
@@ -277,17 +288,6 @@ class FileSystemApp:
             extension = self.prompt_for_input("Ingrese la extensión del archivo:")
             if file_name and extension:
                 show_file_properties(self.fs, file_name, extension)
-        else:
-            messagebox.showerror("Error", "Primero debe crear el disco.")
-
-    # Función para eliminar un archivo
-    def delete_file(self):
-        if hasattr(self, 'fs'):
-            file_name = self.prompt_for_input("Ingrese el nombre del archivo (sin extensión):")
-            extension = self.prompt_for_input("Ingrese la extensión del archivo:")
-            if file_name and extension:
-                delete_file(self.fs, file_name, extension)
-                self.result_text.insert(tk.END, f"Archivo '{file_name}.{extension}' eliminado.\n")
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 

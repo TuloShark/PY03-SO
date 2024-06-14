@@ -1,28 +1,30 @@
 # Archivo: comandos_basicos/eliminar.py
 
-import os
-
-def delete_file(fs, file_name, extension):
+def delete_file(fs, file_path):
     """
-    Elimina un archivo del directorio actual del sistema de archivos y libera los sectores del disco.
-
+    Elimina un archivo específico del sistema de archivos.
+    
     :param fs: Instancia del sistema de archivos.
-    :param file_name: Nombre del archivo a eliminar.
-    :param extension: Extensión del archivo a eliminar.
+    :param file_path: Ruta del archivo a eliminar.
+    :return: Mensaje de éxito o de error si no se encuentra el archivo.
     """
-    if file_name in fs.current_directory.files:
-        file_obj = fs.current_directory.files[file_name]
-        if file_obj.extension == extension:
-            # Liberar los sectores ocupados por el archivo
-            for sector in file_obj.sectors:
-                fs.free_sectors.append(sector)
-                fs.free_sectors.sort()
+    file_path_parts = file_path.strip('/').split('/')
+    file_name = file_path_parts[-1]
 
-            # Eliminar el archivo del directorio
-            del fs.current_directory.files[file_name]
-            fs.current_directory.modification_date = time.time()
-            print(f"Archivo '{file_name}.{extension}' eliminado.")
+    dir = fs.root
+
+    # Navegar a través del árbol de directorios para la ruta del archivo
+    for part in file_path_parts[:-1]:
+        if part in dir.subdirectories:
+            dir = dir.subdirectories[part]
         else:
-            print(f"La extensión '{extension}' no coincide con el archivo '{file_name}'.")
+            return f"Ruta del archivo '{file_path}' no encontrada."
+
+    if file_name in dir.files:
+        file_obj = dir.files.pop(file_name)
+        # Liberar los sectores ocupados por el archivo
+        for sector in file_obj.sectors:
+            fs.free_sectors.append(sector)
+        return f"Archivo '{file_path}' eliminado."
     else:
-        print(f"El archivo '{file_name}' no existe en el directorio actual.")
+        return f"Archivo '{file_path}' no encontrado."

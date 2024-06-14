@@ -1,4 +1,5 @@
 # Archivo: comandos_basicos/editar.py
+import time  # Importar el módulo time
 
 def edit_file(fs, file_path, new_content):
     """
