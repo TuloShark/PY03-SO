@@ -14,6 +14,7 @@ from comandos_basicos.ver import view_file
 from comandos_basicos.editar import edit_file
 from comandos_basicos.tree import show_tree 
 from comandos_basicos.ver_propiedades import show_file_properties
+from comandos_basicos.eliminar import delete_file
 
 class FileSystemApp:
     def __init__(self, root):
@@ -91,11 +92,11 @@ class FileSystemApp:
         self.edit_button.grid(row=1, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para ver propiedades de un archivo
-        self.show_properties_button = ttk.Button(commands_frame, text="Ver Propiedades de Archivo", command=self.show_file_properties_dialog)
+        self.show_properties_button = ttk.Button(commands_frame, text="Ver Propiedades de Archivo", command=self.show_file_properties)
         self.show_properties_button.grid(row=2, column=1, pady=2, sticky=(tk.W, tk.E))
         
         # Botón para eliminar un archivo
-        self.show_properties_button = ttk.Button(commands_frame, text="Eliminar (ReMove)", command=self.show_file_properties_dialog)
+        self.show_properties_button = ttk.Button(commands_frame, text="Eliminar (ReMove)", command=self.delete_file)
         self.show_properties_button.grid(row=3, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para mostrar el árbol
@@ -253,12 +254,23 @@ class FileSystemApp:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
     # Función mostrar propiedades
-    def show_file_properties_dialog(self):
+    def show_file_properties(self):
         if hasattr(self, 'fs'):
             file_name = self.prompt_for_input("Ingrese el nombre del archivo (sin extensión):")
             extension = self.prompt_for_input("Ingrese la extensión del archivo:")
             if file_name and extension:
                 show_file_properties(self.fs, file_name, extension)
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    # Función para eliminar un archivo
+    def delete_file(self):
+        if hasattr(self, 'fs'):
+            file_name = self.prompt_for_input("Ingrese el nombre del archivo (sin extensión):")
+            extension = self.prompt_for_input("Ingrese la extensión del archivo:")
+            if file_name and extension:
+                delete_file(self.fs, file_name, extension)
+                self.result_text.insert(tk.END, f"Archivo '{file_name}.{extension}' eliminado.\n")
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
