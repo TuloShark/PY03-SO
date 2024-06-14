@@ -10,6 +10,8 @@ from comandos_basicos.listar_dir import list_directory
 from comandos_basicos.mover import move
 from comandos_basicos.copiar import copy
 from comandos_basicos.find import find
+from comandos_basicos.ver import view_file
+from comandos_basicos.editar import edit_file
 from comandos_basicos.tree import show_tree 
 
 class FileSystemApp:
@@ -79,13 +81,21 @@ class FileSystemApp:
         self.find_button = ttk.Button(commands_frame, text="Buscar (find)", command=self.find)
         self.find_button.grid(row=6, column=0, pady=2, sticky=(tk.W, tk.E))
 
+        # Botón para ver archivos
+        self.view_button = ttk.Button(commands_frame, text="Ver Archivo (view)", command=self.view_file)
+        self.view_button.grid(row=7, column=0, pady=2, sticky=(tk.W, tk.E))
+
+        # Botón para editar archivos
+        self.edit_button = ttk.Button(commands_frame, text="Editar Archivo (edit)", command=self.edit_file)
+        self.edit_button.grid(row=8, column=0, pady=2, sticky=(tk.W, tk.E))
+
         # Botón para mostrar el árbol
         self.show_tree_button = ttk.Button(commands_frame, text="Árbol (Tree)", command=self.show_directory_tree)
-        self.show_tree_button.grid(row=7, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.show_tree_button.grid(row=9, column=0, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para regresar al root
         self.back_to_root_button = ttk.Button(commands_frame, text="Raíz (Root)", command=self.back_to_root)
-        self.back_to_root_button.grid(row=8, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.back_to_root_button.grid(row=10, column=0, pady=2, sticky=(tk.W, tk.E))
 
         # Frame derecho para resultados
         result_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
@@ -177,6 +187,25 @@ class FileSystemApp:
                 self.result_text.insert(tk.END, "Resultados de la búsqueda:\n")
                 for path in result:
                     self.result_text.insert(tk.END, f"{path}\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    def view_file(self):
+        if hasattr(self, 'fs'):
+            file_path = self.prompt_for_input("Ingrese la ruta del archivo a ver:")
+            if file_path:
+                content = view_file(self.fs, file_path)
+                self.result_text.insert(tk.END, f"Contenido del archivo '{file_path}':\n{content}\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    def edit_file(self):
+        if hasattr(self, 'fs'):
+            file_path = self.prompt_for_input("Ingrese la ruta del archivo a editar:")
+            new_content = self.prompt_for_input("Ingrese el nuevo contenido del archivo:")
+            if file_path and new_content:
+                result = edit_file(self.fs, file_path, new_content)
+                self.result_text.insert(tk.END, f"{result}\n")
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
