@@ -111,10 +111,11 @@ class FileSystemApp:
         self.back_to_root_button = ttk.Button(commands_frame, text="Raíz (Root)", command=self.back_to_root)
         self.back_to_root_button.grid(row=6, column=1, pady=2, sticky=(tk.W, tk.E))
 
-        # Botones para guardar y cargar estado
+        # Botón para guardar el estado
         self.save_button = ttk.Button(commands_frame, text="Guardar Estado", command=self.save_state)
         self.save_button.grid(row=7, column=1, pady=2, sticky=(tk.W, tk.E))
 
+        # Botón para cargar el estado
         self.load_button = ttk.Button(commands_frame, text="Cargar Estado", command=self.load_state)
         self.load_button.grid(row=7, column=0, pady=2, sticky=(tk.W, tk.E))
 
@@ -270,6 +271,22 @@ class FileSystemApp:
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
+    def save_state(self):
+        if hasattr(self, 'fs'):
+            self.fs.save_state()
+            self.result_text.insert(tk.END, "Estado del sistema de archivos guardado.\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    def load_state(self):
+        try:
+            self.fs = FileSystem.load_state()
+            self.result_text.insert(tk.END, "Estado del sistema de archivos cargado.\n")
+        except FileNotFoundError:
+            messagebox.showerror("Error", "No se encontró un estado guardado.")
+        except Exception as e:
+            messagebox.showerror("Error", f"Error al cargar el estado: {e}")
+
     def prompt_for_input(self, prompt):
         input_dialog = tk.Toplevel(self.root)
         input_dialog.title(prompt)
@@ -313,22 +330,6 @@ class FileSystemApp:
                 show_file_properties(self.fs, file_name, extension)
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
-
-    # Función para guardar el estado
-    def save_state(self):
-        if hasattr(self, 'fs'):
-            self.fs.save_state()
-            self.result_text.insert(tk.END, "Estado del sistema de archivos guardado.\n")
-        else:
-            messagebox.showerror("Error", "Primero debe crear el disco.")
-
-    # Función para cargar el estado
-    def load_state(self):
-        try:
-            self.fs = FileSystem.load_state()
-            self.result_text.insert(tk.END, "Estado del sistema de archivos cargado.\n")
-        except FileNotFoundError:
-            messagebox.showerror("Error", "No se encontró un estado guardado del sistema de archivos.")
 
 if __name__ == "__main__":
     root = tk.Tk()
