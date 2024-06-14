@@ -84,23 +84,27 @@ class FileSystemApp:
 
         # Botón para ver archivos
         self.view_button = ttk.Button(commands_frame, text="Ver Archivo (view)", command=self.view_file)
-        self.view_button.grid(row=7, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.view_button.grid(row=0, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para editar archivos
         self.edit_button = ttk.Button(commands_frame, text="Editar Archivo (edit)", command=self.edit_file)
-        self.edit_button.grid(row=8, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.edit_button.grid(row=1, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para ver propiedades de un archivo
         self.show_properties_button = ttk.Button(commands_frame, text="Ver Propiedades de Archivo", command=self.show_file_properties_dialog)
-        self.show_properties_button.grid(row=9, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.show_properties_button.grid(row=2, column=1, pady=2, sticky=(tk.W, tk.E))
+        
+        # Botón para eliminar un archivo
+        self.show_properties_button = ttk.Button(commands_frame, text="Eliminar (ReMove)", command=self.show_file_properties_dialog)
+        self.show_properties_button.grid(row=3, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para mostrar el árbol
         self.show_tree_button = ttk.Button(commands_frame, text="Árbol (Tree)", command=self.show_directory_tree)
-        self.show_tree_button.grid(row=10, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.show_tree_button.grid(row=4, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para regresar al root
         self.back_to_root_button = ttk.Button(commands_frame, text="Raíz (Root)", command=self.back_to_root)
-        self.back_to_root_button.grid(row=11, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.back_to_root_button.grid(row=6, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Frame derecho para resultados
         result_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
