@@ -14,7 +14,7 @@ from comandos_basicos.ver import view_file
 from comandos_basicos.editar import edit_file
 from comandos_basicos.tree import show_tree
 from comandos_basicos.ver_propiedades import show_file_properties
-from comandos_basicos.eliminar import delete_file
+from comandos_basicos.eliminar import delete_file, delete_directory
 
 class FileSystemApp:
     def __init__(self, root):
@@ -103,16 +103,20 @@ class FileSystemApp:
         self.show_tree_button = ttk.Button(commands_frame, text="Árbol (Tree)", command=self.show_directory_tree)
         self.show_tree_button.grid(row=4, column=1, pady=2, sticky=(tk.W, tk.E))
 
+        # Botón para limpiar la pantalla de salida
+        self.clear_output_button = ttk.Button(commands_frame, text="Limpiar Pantalla", command=self.clear_output)
+        self.clear_output_button.grid(row=5, column=1, pady=2, sticky=(tk.W, tk.E))
+
         # Botón para regresar al root
         self.back_to_root_button = ttk.Button(commands_frame, text="Raíz (Root)", command=self.back_to_root)
-        self.back_to_root_button.grid(row=5, column=1, pady=2, sticky=(tk.W, tk.E))
+        self.back_to_root_button.grid(row=6, column=1, pady=2, sticky=(tk.W, tk.E))
 
         # Botones para guardar y cargar estado
         self.save_button = ttk.Button(commands_frame, text="Guardar Estado", command=self.save_state)
-        self.save_button.grid(row=6, column=1, pady=2, sticky=(tk.W, tk.E))
+        self.save_button.grid(row=7, column=1, pady=2, sticky=(tk.W, tk.E))
 
         self.load_button = ttk.Button(commands_frame, text="Cargar Estado", command=self.load_state)
-        self.load_button.grid(row=7, column=1, pady=2, sticky=(tk.W, tk.E))
+        self.load_button.grid(row=7, column=0, pady=2, sticky=(tk.W, tk.E))
 
         # Frame derecho para resultados
         result_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
@@ -242,14 +246,27 @@ class FileSystemApp:
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
+    def clear_output(self):
+        self.result_text.delete('1.0', tk.END)
+
     def delete_file(self):
         if hasattr(self, 'fs'):
-            file_name = self.prompt_for_input("Ingrese el nombre del archivo (sin extensión):")
-            extension = self.prompt_for_input("Ingrese la extensión del archivo:")
-            if file_name and extension:
-                full_name = f"{file_name}.{extension}"
-                result = delete_file(self.fs, full_name)
-                self.result_text.insert(tk.END, f"{result}\n")
+            choice = messagebox.askquestion("Eliminar", "¿Desea eliminar un archivo o un directorio?", icon='warning')
+            if choice == 'yes':
+                item_type = self.prompt_for_input("Ingrese 1 para eliminar un archivo o 2 para eliminar un directorio:")
+                if item_type == '1':
+                    file_name = self.prompt_for_input("Ingrese el nombre del archivo (sin extensión):")
+                    extension = self.prompt_for_input("Ingrese la extensión del archivo:")
+                    if file_name and extension:
+                        delete_file(self.fs, file_name, extension)
+                        self.result_text.insert(tk.END, f"Archivo {file_name}.{extension} eliminado.\n")
+                elif item_type == '2':
+                    dir_name = self.prompt_for_input("Ingrese el nombre del directorio a eliminar:")
+                    if dir_name:
+                        delete_directory(self.fs, dir_name)
+                        self.result_text.insert(tk.END, f"Directorio {dir_name} eliminado.\n")
+                else:
+                    messagebox.showerror("Error", "Entrada no válida. Debe ingresar 'archivo' o 'directorio'.")
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 

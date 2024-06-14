@@ -1,30 +1,64 @@
 # Archivo: comandos_basicos/eliminar.py
 
-def delete_file(fs, file_path):
+import time
+
+def delete_file(fs, file_name, extension):
     """
-    Elimina un archivo específico del sistema de archivos.
+    Elimina un archivo en el directorio actual del sistema de archivos.
     
     :param fs: Instancia del sistema de archivos.
-    :param file_path: Ruta del archivo a eliminar.
-    :return: Mensaje de éxito o de error si no se encuentra el archivo.
+    :param file_name: Nombre del archivo a eliminar.
+    :param extension: Extensión del archivo a eliminar.
     """
-    file_path_parts = file_path.strip('/').split('/')
-    file_name = file_path_parts[-1]
-
-    dir = fs.root
-
-    # Navegar a través del árbol de directorios para la ruta del archivo
-    for part in file_path_parts[:-1]:
-        if part in dir.subdirectories:
-            dir = dir.subdirectories[part]
+    if file_name in fs.current_directory.files:
+        file = fs.current_directory.files[file_name]
+        if file.extension == extension:
+            # Liberar los sectores ocupados por el archivo
+            for sector in file.sectors:
+                fs.disk.write_sector(sector, b'\x00' * fs.sector_size)  # Escribir sectores con bytes nulos
+                fs.free_sectors.append(sector)
+                fs.free_sectors.sort()
+            del fs.current_directory.files[file_name]
+            fs.current_directory.modification_date = time.time()
+            print(f"Archivo {file_name}.{extension} eliminado.")
         else:
-            return f"Ruta del archivo '{file_path}' no encontrada."
-
-    if file_name in dir.files:
-        file_obj = dir.files.pop(file_name)
-        # Liberar los sectores ocupados por el archivo
-        for sector in file_obj.sectors:
-            fs.free_sectors.append(sector)
-        return f"Archivo '{file_path}' eliminado."
+            print(f"El archivo {file_name} no tiene la extensión {extension}.")
     else:
-        return f"Archivo '{file_path}' no encontrado."
+        print(f"Archivo {file_name}.{extension} no encontrado.")
+
+def delete_directory(fs, dir_name):
+    """
+    Elimina un directorio y su contenido de manera recursiva en el sistema de archivos.
+    
+    :param fs: Instancia del sistema de archivos.
+    :param dir_name: Nombre del directorio a eliminar.
+    """
+    if dir_name in fs.current_directory.subdirectories:
+        dir_to_delete = fs.current_directory.subdirectories[dir_name]
+        _delete_directory_recursive(fs, dir_to_delete)
+        del fs.current_directory.subdirectories[dir_name]
+        fs.current_directory.modification_date = time.time()
+        print(f"Directorio {dir_name} eliminado.")
+    else:
+        print(f"Directorio {dir_name} no encontrado.")
+
+def _delete_directory_recursive(fs, directory):
+    """
+    Función recursiva para eliminar un directorio y su contenido.
+    
+    :param fs: Instancia del sistema de archivos.
+    :param directory: Directorio a eliminar.
+    """
+    # Eliminar archivos en el directorio
+    for file_name in list(directory.files.keys()):
+        file = directory.files[file_name]
+        for sector in file.sectors:
+            fs.disk.write_sector(sector, b'\x00' * fs.sector_size)  # Escribir sectores con bytes nulos
+            fs.free_sectors.append(sector)
+            fs.free_sectors.sort()
+        del directory.files[file_name]
+
+    # Eliminar subdirectorios de manera recursiva
+    for subdir_name in list(directory.subdirectories.keys()):
+        _delete_directory_recursive(fs, directory.subdirectories[subdir_name])
+        del directory.subdirectories[subdir_name]
