@@ -28,9 +28,9 @@ def show_file_properties(fs, file_name, extension):
 
 def format_timestamp(timestamp):
     """
-    Formatea un timestamp de UNIX a una cadena de fecha y hora legible.
+    Formatea un timestamp a una cadena de fecha y hora legible.
 
-    :param timestamp: Timestamp de UNIX.
+    :param timestamp: Timestamp.
     :return: Cadena formateada de fecha y hora.
     """
     import time
