@@ -47,10 +47,9 @@ def find_file(current_dir, file_name, extension):
     """
     from fnmatch import fnmatch
 
-    if file_name in current_dir.files:
-        file_obj = current_dir.files[file_name]
-        if file_obj.extension == extension:
-            return f"{current_dir.name}/{file_name}.{extension}", file_obj
+    for file in current_dir.files.values():
+        if file.name == file_name and file.extension == extension:
+            return current_dir.name, file
 
     for dir_name, dir_obj in current_dir.subdirectories.items():
         result = find_file(dir_obj, file_name, extension)
