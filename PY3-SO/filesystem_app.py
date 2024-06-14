@@ -13,6 +13,7 @@ from comandos_basicos.find import find
 from comandos_basicos.ver import view_file
 from comandos_basicos.editar import edit_file
 from comandos_basicos.tree import show_tree 
+from comandos_basicos.ver_propiedades import show_file_properties
 
 class FileSystemApp:
     def __init__(self, root):
@@ -89,13 +90,17 @@ class FileSystemApp:
         self.edit_button = ttk.Button(commands_frame, text="Editar Archivo (edit)", command=self.edit_file)
         self.edit_button.grid(row=8, column=0, pady=2, sticky=(tk.W, tk.E))
 
+        # Botón para ver propiedades de un archivo
+        self.show_properties_button = ttk.Button(commands_frame, text="Ver Propiedades de Archivo", command=self.show_file_properties_dialog)
+        self.show_properties_button.grid(row=9, column=0, pady=2, sticky=(tk.W, tk.E))
+
         # Botón para mostrar el árbol
         self.show_tree_button = ttk.Button(commands_frame, text="Árbol (Tree)", command=self.show_directory_tree)
-        self.show_tree_button.grid(row=9, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.show_tree_button.grid(row=10, column=0, pady=2, sticky=(tk.W, tk.E))
 
         # Botón para regresar al root
         self.back_to_root_button = ttk.Button(commands_frame, text="Raíz (Root)", command=self.back_to_root)
-        self.back_to_root_button.grid(row=10, column=0, pady=2, sticky=(tk.W, tk.E))
+        self.back_to_root_button.grid(row=11, column=0, pady=2, sticky=(tk.W, tk.E))
 
         # Frame derecho para resultados
         result_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
@@ -240,6 +245,16 @@ class FileSystemApp:
         if hasattr(self, 'fs'):
             self.fs.current_directory = self.fs.root
             self.result_text.insert(tk.END, "Regresando a la raíz... '/'\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    # Función mostrar propiedades
+    def show_file_properties_dialog(self):
+        if hasattr(self, 'fs'):
+            file_name = self.prompt_for_input("Ingrese el nombre del archivo (sin extensión):")
+            extension = self.prompt_for_input("Ingrese la extensión del archivo:")
+            if file_name and extension:
+                show_file_properties(self.fs, file_name, extension)
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
