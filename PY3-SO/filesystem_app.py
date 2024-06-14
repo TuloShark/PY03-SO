@@ -1,70 +1,100 @@
 # Archivo: filesystem_app.py
 
 import tkinter as tk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 from filesystem import FileSystem
 from comandos_basicos.mkdir import mkdir
 from comandos_basicos.file import create_file
 from comandos_basicos.cambiar_dir import change_directory
 from comandos_basicos.listar_dir import list_directory
+from comandos_basicos.mover import move
+from comandos_basicos.copiar import copy
+from comandos_basicos.find import find
 
-# Clase que representa la aplicación del sistema de archivos
 class FileSystemApp:
     def __init__(self, root):
-        self.root = root  # Ventana principal
-        self.root.title("File System")  # Título de la ventana
-        self.create_widgets()  # Crear los elementos de la interfaz
-
-    # Crear los elementos de la interfaz gráfica
+        self.root = root
+        self.root.title("File System")
+        self.create_widgets()
+        
     def create_widgets(self):
+        # Configurar el estilo
+        style = ttk.Style()
+        style.configure('TButton', padding=6, relief='flat', background='#ccc')
+        style.configure('TLabel', padding=5, background='#eee')
+        style.configure('TFrame', background='#eee')
+        
+        # Frame principal
+        main_frame = ttk.Frame(self.root, padding="10 10 10 10")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # Frame izquierdo para controles
+        control_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
+        control_frame.grid(row=0, column=0, sticky=(tk.N, tk.S, tk.W, tk.E))
+        
         # Etiqueta y entrada para el número de sectores
-        self.sectors_label = tk.Label(self.root, text="Número de Sectores:")
-        self.sectors_label.pack()
-        self.sectors_entry = tk.Entry(self.root)
-        self.sectors_entry.pack()
+        self.sectors_label = ttk.Label(control_frame, text="Número de Sectores:")
+        self.sectors_label.grid(row=0, column=0, sticky=tk.W, pady=2)
+        self.sectors_entry = ttk.Entry(control_frame)
+        self.sectors_entry.grid(row=0, column=1, pady=2)
 
         # Etiqueta y entrada para el tamaño de los sectores
-        self.sectorsize_label = tk.Label(self.root, text="Tamaño de los Sectores (bytes):")
-        self.sectorsize_label.pack()
-        self.sectorsize_entry = tk.Entry(self.root)
-        self.sectorsize_entry.pack()
+        self.sectorsize_label = ttk.Label(control_frame, text="Tamaño de los Sectores (bytes):")
+        self.sectorsize_label.grid(row=1, column=0, sticky=tk.W, pady=2)
+        self.sectorsize_entry = ttk.Entry(control_frame)
+        self.sectorsize_entry.grid(row=1, column=1, pady=2)
 
         # Botón para crear el disco
-        self.create_button = tk.Button(self.root, text="Crear Disco", command=self.create_disk)
-        self.create_button.pack()
+        self.create_button = ttk.Button(control_frame, text="Crear Disco", command=self.create_disk)
+        self.create_button.grid(row=2, column=0, columnspan=2, pady=5)
 
         # Botón para mostrar los sectores del disco
-        self.show_sectors_button = tk.Button(self.root, text="Mostrar Sectores", command=self.show_sectors)
-        self.show_sectors_button.pack()
+        self.show_sectors_button = ttk.Button(control_frame, text="Mostrar Sectores", command=self.show_sectors)
+        self.show_sectors_button.grid(row=3, column=0, columnspan=2, pady=5)
+
+        # Frame para los comandos básicos
+        commands_frame = ttk.Frame(control_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
+        commands_frame.grid(row=4, column=0, columnspan=2, pady=10, sticky=(tk.W, tk.E, tk.N, tk.S))
 
         # Botones para los comandos básicos
-        self.mkdir_button = tk.Button(self.root, text="Crear Directorio (mkdir)", command=self.create_directory)
-        self.mkdir_button.pack()
+        self.mkdir_button = ttk.Button(commands_frame, text="Crear Directorio (mkdir)", command=self.create_directory)
+        self.mkdir_button.grid(row=0, column=0, pady=2, sticky=(tk.W, tk.E))
 
-        self.create_file_button = tk.Button(self.root, text="Crear Archivo (file)", command=self.create_new_file)
-        self.create_file_button.pack()
+        self.create_file_button = ttk.Button(commands_frame, text="Crear Archivo (file)", command=self.create_new_file)
+        self.create_file_button.grid(row=1, column=0, pady=2, sticky=(tk.W, tk.E))
 
-        self.change_dir_button = tk.Button(self.root, text="Cambiar Directorio (cd)", command=self.change_dir)
-        self.change_dir_button.pack()
+        self.change_dir_button = ttk.Button(commands_frame, text="Cambiar Directorio (cd)", command=self.change_dir)
+        self.change_dir_button.grid(row=2, column=0, pady=2, sticky=(tk.W, tk.E))
 
-        self.list_dir_button = tk.Button(self.root, text="Listar Directorio (ls)", command=self.list_dir)
-        self.list_dir_button.pack()
+        self.list_dir_button = ttk.Button(commands_frame, text="Listar Directorio (ls)", command=self.list_dir)
+        self.list_dir_button.grid(row=3, column=0, pady=2, sticky=(tk.W, tk.E))
+
+        self.move_button = ttk.Button(commands_frame, text="Mover (mv)", command=self.move)
+        self.move_button.grid(row=4, column=0, pady=2, sticky=(tk.W, tk.E))
+
+        self.copy_button = ttk.Button(commands_frame, text="Copiar (cp)", command=self.copy)
+        self.copy_button.grid(row=5, column=0, pady=2, sticky=(tk.W, tk.E))
+
+        self.find_button = ttk.Button(commands_frame, text="Buscar (find)", command=self.find)
+        self.find_button.grid(row=6, column=0, pady=2, sticky=(tk.W, tk.E))
+
+        # Frame derecho para resultados
+        result_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
+        result_frame.grid(row=0, column=1, sticky=(tk.N, tk.S, tk.W, tk.E))
 
         # Área de texto para mostrar los resultados
-        self.result_text = tk.Text(self.root)
-        self.result_text.pack()
+        self.result_text = tk.Text(result_frame, wrap=tk.WORD, width=80, height=30, bg="#f0f0f0", fg="#000")
+        self.result_text.grid(row=0, column=0, pady=10, padx=10)
 
-    # Método para crear el disco
     def create_disk(self):
         try:
-            num_sectors = int(self.sectors_entry.get())  # Obtener número de sectores
-            sector_size = int(self.sectorsize_entry.get())  # Obtener tamaño de los sectores
-            self.fs = FileSystem(num_sectors, sector_size)  # Crear el sistema de archivos
+            num_sectors = int(self.sectors_entry.get())
+            sector_size = int(self.sectorsize_entry.get())
+            self.fs = FileSystem(num_sectors, sector_size)
             self.result_text.insert(tk.END, f"Disco creado con {num_sectors} sectores de {sector_size} bytes cada uno.\n")
         except ValueError:
             messagebox.showerror("Error", "Por favor ingrese valores válidos para los sectores y el tamaño de los sectores.")
 
-    # Método para mostrar los sectores del disco
     def show_sectors(self):
         if hasattr(self, 'fs'):
             sectors = self.fs.disk.read_all_sectors()
@@ -74,7 +104,6 @@ class FileSystemApp:
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
-    # Método para crear un nuevo directorio
     def create_directory(self):
         if hasattr(self, 'fs'):
             dir_name = self.prompt_for_input("Ingrese el nombre del directorio:")
@@ -84,7 +113,6 @@ class FileSystemApp:
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
-    # Método para crear un nuevo archivo
     def create_new_file(self):
         if hasattr(self, 'fs'):
             file_name = self.prompt_for_input("Ingrese el nombre del archivo (sin extensión):")
@@ -96,7 +124,6 @@ class FileSystemApp:
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
-    # Método para cambiar de directorio
     def change_dir(self):
         if hasattr(self, 'fs'):
             dir_name = self.prompt_for_input("Ingrese el nombre del directorio:")
@@ -106,7 +133,6 @@ class FileSystemApp:
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
-    # Método para listar el contenido del directorio actual
     def list_dir(self):
         if hasattr(self, 'fs'):
             result = list_directory(self.fs)
@@ -114,19 +140,55 @@ class FileSystemApp:
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
-    # Método para mostrar un cuadro de diálogo de entrada
+    def move(self):
+        if hasattr(self, 'fs'):
+            src = self.prompt_for_input("Ingrese la ruta de origen:")
+            dest = self.prompt_for_input("Ingrese la ruta de destino:")
+            if src and dest:
+                move(self.fs, src, dest)
+                self.result_text.insert(tk.END, f"'{src}' movido a '{dest}'.\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    def copy(self):
+        if hasattr(self, 'fs'):
+            src = self.prompt_for_input("Ingrese la ruta de origen:")
+            dest = self.prompt_for_input("Ingrese la ruta de destino:")
+            if src and dest:
+                copy(self.fs, src, dest)
+                self.result_text.insert(tk.END, f"'{src}' copiado a '{dest}'.\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    def find(self):
+        if hasattr(self, 'fs'):
+            pattern = self.prompt_for_input("Ingrese el patrón de búsqueda:")
+            if pattern:
+                result = find(self.fs, pattern)
+                self.result_text.insert(tk.END, "Resultados de la búsqueda:\n")
+                for path in result:
+                    self.result_text.insert(tk.END, f"{path}\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
     def prompt_for_input(self, prompt):
         input_dialog = tk.Toplevel(self.root)
         input_dialog.title(prompt)
-        tk.Label(input_dialog, text=prompt).pack()
-        input_entry = tk.Entry(input_dialog)
-        input_entry.pack()
+        ttk.Label(input_dialog, text=prompt).pack(pady=10, padx=10)
+        input_entry = ttk.Entry(input_dialog)
+        input_entry.pack(pady=10, padx=10)
         input_entry.focus_set()
 
-        def on_ok():
+        def on_ok(event=None):
             input_dialog.input_value = input_entry.get()
             input_dialog.destroy()
 
-        tk.Button(input_dialog, text="OK", command=on_ok).pack()
+        input_entry.bind("<Return>", on_ok)
+        ttk.Button(input_dialog, text="OK", command=on_ok).pack(pady=10, padx=10)
         self.root.wait_window(input_dialog)
         return getattr(input_dialog, 'input_value', None)
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = FileSystemApp(root)
+    root.mainloop()
