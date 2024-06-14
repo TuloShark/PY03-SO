@@ -107,6 +107,13 @@ class FileSystemApp:
         self.back_to_root_button = ttk.Button(commands_frame, text="Raíz (Root)", command=self.back_to_root)
         self.back_to_root_button.grid(row=5, column=1, pady=2, sticky=(tk.W, tk.E))
 
+        # Botones para guardar y cargar estado
+        self.save_button = ttk.Button(commands_frame, text="Guardar Estado", command=self.save_state)
+        self.save_button.grid(row=6, column=1, pady=2, sticky=(tk.W, tk.E))
+
+        self.load_button = ttk.Button(commands_frame, text="Cargar Estado", command=self.load_state)
+        self.load_button.grid(row=7, column=1, pady=2, sticky=(tk.W, tk.E))
+
         # Frame derecho para resultados
         result_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
         result_frame.grid(row=0, column=1, sticky=(tk.N, tk.S, tk.W, tk.E))
@@ -137,16 +144,16 @@ class FileSystemApp:
         if hasattr(self, 'fs'):
             dir_name = self.prompt_for_input("Ingrese el nombre del directorio:")
             if dir_name:
-                if dir_name in self.fs.current_directory.subdirectories:
-                    overwrite = messagebox.askyesno("Sobrescribir directorio", f"El directorio '{dir_name}' ya existe. ¿Desea sobrescribirlo?")
-                    if not overwrite:
-                        self.result_text.insert(tk.END, f"Operación cancelada. El directorio '{dir_name}' no fue creado.\n")
-                        return
                 success, message = mkdir(self.fs, dir_name)
-                if not success:
-                    messagebox.showerror("Error", message)
-                else:
+                if success:
                     self.result_text.insert(tk.END, f"{message}\n")
+                else:
+                    overwrite = messagebox.askyesno("Sobrescribir directorio", f"{message} ¿Desea sobrescribirlo?")
+                    if overwrite:
+                        success, message = mkdir(self.fs, dir_name, overwrite=True)
+                        self.result_text.insert(tk.END, f"{message}\n")
+                    else:
+                        self.result_text.insert(tk.END, "Operación cancelada.\n")
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
@@ -156,17 +163,16 @@ class FileSystemApp:
             extension = self.prompt_for_input("Ingrese la extensión del archivo:")
             content = self.prompt_for_input("Ingrese el contenido del archivo:")
             if file_name and extension:
-                full_name = f"{file_name}.{extension}"
-                if full_name in self.fs.current_directory.files:
-                    overwrite = messagebox.askyesno("Sobrescribir archivo", f"El archivo '{full_name}' ya existe. ¿Desea sobrescribirlo?")
-                    if not overwrite:
-                        self.result_text.insert(tk.END, f"Operación cancelada. El archivo '{full_name}' no fue creado.\n")
-                        return
                 success, message = create_file(self.fs, file_name, extension, content)
-                if not success:
-                    messagebox.showerror("Error", message)
-                else:
+                if success:
                     self.result_text.insert(tk.END, f"{message}\n")
+                else:
+                    overwrite = messagebox.askyesno("Sobrescribir archivo", f"{message} ¿Desea sobrescribirlo?")
+                    if overwrite:
+                        success, message = create_file(self.fs, file_name, extension, content, overwrite=True)
+                        self.result_text.insert(tk.END, f"{message}\n")
+                    else:
+                        self.result_text.insert(tk.END, "Operación cancelada.\n")
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
 
@@ -290,6 +296,22 @@ class FileSystemApp:
                 show_file_properties(self.fs, file_name, extension)
         else:
             messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    # Función para guardar el estado
+    def save_state(self):
+        if hasattr(self, 'fs'):
+            self.fs.save_state()
+            self.result_text.insert(tk.END, "Estado del sistema de archivos guardado.\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    # Función para cargar el estado
+    def load_state(self):
+        try:
+            self.fs = FileSystem.load_state()
+            self.result_text.insert(tk.END, "Estado del sistema de archivos cargado.\n")
+        except FileNotFoundError:
+            messagebox.showerror("Error", "No se encontró un estado guardado del sistema de archivos.")
 
 if __name__ == "__main__":
     root = tk.Tk()
