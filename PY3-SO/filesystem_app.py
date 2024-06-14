@@ -10,6 +10,7 @@ from comandos_basicos.listar_dir import list_directory
 from comandos_basicos.mover import move
 from comandos_basicos.copiar import copy
 from comandos_basicos.find import find
+from comandos_basicos.tree import show_tree 
 
 class FileSystemApp:
     def __init__(self, root):
@@ -77,6 +78,14 @@ class FileSystemApp:
 
         self.find_button = ttk.Button(commands_frame, text="Buscar (find)", command=self.find)
         self.find_button.grid(row=6, column=0, pady=2, sticky=(tk.W, tk.E))
+
+        # Botón para mostrar el árbol
+        self.show_tree_button = ttk.Button(commands_frame, text="Árbol (Tree)", command=self.show_directory_tree)
+        self.show_tree_button.grid(row=7, column=0, pady=2, sticky=(tk.W, tk.E))
+
+        # Botón para regresar al root
+        self.back_to_root_button = ttk.Button(commands_frame, text="Raíz (Root)", command=self.back_to_root)
+        self.back_to_root_button.grid(row=8, column=0, pady=2, sticky=(tk.W, tk.E))
 
         # Frame derecho para resultados
         result_frame = ttk.Frame(main_frame, padding="10 10 10 10", borderwidth=2, relief='solid')
@@ -187,6 +196,23 @@ class FileSystemApp:
         ttk.Button(input_dialog, text="OK", command=on_ok).pack(pady=10, padx=10)
         self.root.wait_window(input_dialog)
         return getattr(input_dialog, 'input_value', None)
+    
+    # Función para mostrar el árbol
+    def show_directory_tree(self):
+        if hasattr(self, 'fs'):
+            tree = show_tree(self.fs)
+            self.result_text.insert(tk.END, "Árbol:\n")
+            self.result_text.insert(tk.END, tree)
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
+
+    # Función para volver al root
+    def back_to_root(self):
+        if hasattr(self, 'fs'):
+            self.fs.current_directory = self.fs.root
+            self.result_text.insert(tk.END, "Regresando a la raíz... '/'\n")
+        else:
+            messagebox.showerror("Error", "Primero debe crear el disco.")
 
 if __name__ == "__main__":
     root = tk.Tk()
